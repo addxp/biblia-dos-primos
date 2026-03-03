@@ -3,13 +3,22 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
-export async function registerAction(formData: FormData): Promise<void> {
+export type AuthState = {
+  ok: boolean;
+  message?: string;
+};
+
+export async function registerAction(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
   const name = String(formData.get("name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!email || !password) redirect("/register?error=1");
-  if (password.length < 6) redirect("/register?error=2");
+  if (!name) return { ok: false, message: "Digite seu nome." };
+  if (!email) return { ok: false, message: "Digite seu email." };
+  if (password.length < 6) return { ok: false, message: "A senha precisa ter pelo menos 6 caracteres." };
 
   const supabase = await createClient();
 
@@ -20,15 +29,15 @@ export async function registerAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    // email já usado, senha fraca etc.
-    redirect("/register?error=3");
+    // mensagens comuns: User already registered, Password should be at least...
+    return { ok: false, message: error.message };
   }
 
-  // Se confirmação de email estiver ligada, data.session vem null
+  // Se confirmação de email estiver ligada, não vem session:
   if (!data.session) {
-    redirect("/login?msg=Conta criada! Confirme seu email e faça login.");
+    return { ok: true, message: "Conta criada! Agora confirme seu email para poder entrar." };
   }
 
-  // Se não exige confirmação, já entra
+  // Se não exigir confirmação, já pode entrar:
   redirect("/galeria");
 }

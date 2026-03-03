@@ -1,60 +1,55 @@
+"use client";
+
 import Link from "next/link";
-import { registerAction } from "./actions";
+import { useActionState } from "react";
+import { registerAction, type AuthState } from "./actions";
 
-export default function RegisterPage({
-  searchParams,
-}: {
-  searchParams?: { error?: string };
-}) {
-  const error = searchParams?.error;
+const initialState: AuthState = { ok: true };
 
-  const msg =
-    error === "1"
-      ? "Preencha email e senha."
-      : error === "2"
-      ? "Senha precisa ter pelo menos 6 caracteres."
-      : error === "3"
-      ? "Não foi possível criar a conta (email pode já existir)."
-      : null;
+export default function RegisterPage() {
+  const [state, formAction, pending] = useActionState(registerAction, initialState);
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-100 px-6">
       <div className="w-full max-w-md rounded-2xl border border-neutral-800 bg-neutral-950/60 p-6">
         <h1 className="text-3xl font-serif">Criar conta</h1>
 
-        {msg ? (
-          <p className="mt-3 text-sm text-red-300">{msg}</p>
-        ) : (
-          <p className="mt-2 text-sm text-neutral-400">
-            Entre para o arquivo sagrado dos primos.
+        {state.message ? (
+          <p className={`mt-3 text-sm ${state.ok ? "text-emerald-300" : "text-red-300"}`}>
+            {state.message}
           </p>
+        ) : (
+          <p className="mt-2 text-sm text-neutral-400">Entre para o arquivo sagrado dos primos.</p>
         )}
 
-        <form action={registerAction} className="mt-6 space-y-3">
+        <form action={formAction} className="mt-6 space-y-3">
           <input
             name="name"
             type="text"
             placeholder="Seu nome"
             required
-            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3"
+            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3 outline-none"
           />
           <input
             name="email"
             type="email"
             placeholder="Email"
             required
-            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3"
+            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3 outline-none"
           />
           <input
             name="password"
             type="password"
             placeholder="Senha (mín. 6)"
             required
-            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3"
+            className="w-full rounded-xl bg-neutral-900 border border-neutral-800 px-4 py-3 outline-none"
           />
 
-          <button className="w-full rounded-xl bg-amber-300 py-3 font-semibold text-neutral-950">
-            Criar conta
+          <button
+            disabled={pending}
+            className="w-full rounded-xl bg-amber-300 py-3 font-semibold text-neutral-950 hover:bg-amber-200 transition disabled:opacity-60"
+          >
+            {pending ? "Criando..." : "Criar conta"}
           </button>
         </form>
 
