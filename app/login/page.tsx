@@ -23,6 +23,7 @@ export default function LoginPage() {
           <p className="mt-2 text-sm text-neutral-400">Acesse os registros sagrados do clã.</p>
         )}
 
+        {/* ✅ AQUI É O PONTO: action={formAction}, NÃO loginAction */}
         <form action={formAction} className="mt-6 space-y-3">
           <input
             name="email"
